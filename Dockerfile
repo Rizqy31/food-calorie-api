@@ -11,8 +11,9 @@ RUN pip install torch==2.3.1 torchvision --index-url https://download.pytorch.or
 # Install library lain
 RUN pip install --no-cache-dir ultralytics fastapi uvicorn python-multipart Pillow numpy
 
-# Copy semua file ke container
-COPY . .
+# Kode dan model
+COPY app.py .
+COPY models ./models
 
 EXPOSE 8000
 
