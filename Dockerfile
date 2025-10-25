@@ -2,20 +2,28 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Dependensi OS minimal buat PIL/OpenCV
-RUN apt-get update && apt-get install -y --no-install-recommends libgl1 && \
-    rm -rf /var/lib/apt/lists/*
+# Install sistem dependencies minimal yang dibutuhkan Pillow & OpenCV
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Python deps
+# Install Torch (langsung dari wheel CPU resmi biar cepat dan gak timeout)
+RUN pip install --no-cache-dir torch==2.3.1 torchvision --index-url https://download.pytorch.org/whl/cpu
+
+# Copy & install Python dependencies
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Kode dan model
+# Copy app & model
 COPY app.py .
 COPY models ./models
 
-# Port service (Render akan baca dari EXPOSE ini)
+# Port service (dibaca otomatis oleh Railway/Render)
 EXPOSE 8000
 
-# Jalankan FastAPI (tanpa --reload di produksi)
+# Jalankan FastAPI (tanpa reload, mode produksi)
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
